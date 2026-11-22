@@ -1,0 +1,15 @@
+
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "ph.tnhs.tapp",
+      "sha256_cert_fingerprints": [
+        "A9:84:A0:5B:C9:EF:A3:FA:24:64:64:1A:6C:7B:AA:45:B3:F9:57:CA:EE:B1:9F:A6:E5:36:DF:FF:22:D2:EB:CD"
+      ]
+    }
+  }
+]
