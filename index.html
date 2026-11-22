@@ -204,17 +204,18 @@ body.forum-modal-open{overflow:hidden}
 @media(max-width:380px){.forum-composer-footer>span{font-size:9px}.forum-create-btn{font-size:9px}.forum-feed-status{max-width:118px;overflow:hidden;text-overflow:ellipsis}}
 
 
-/* Home hero media: use the GitHub asset paths supplied for TAPP. */
+/* Home hero: school photo is the background; the video has no added frame or fill. */
 .hero {
   background-image:
-    linear-gradient(90deg, rgba(255,250,245,.90) 0%, rgba(255,250,245,.80) 49%, rgba(255,250,245,.42) 100%),
-    url("./photos/tnhs.image");
+    linear-gradient(90deg, rgba(255,250,245,.72) 0%, rgba(255,250,245,.50) 50%, rgba(255,250,245,.18) 100%),
+    url("./photos/tnhs.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   grid-template-columns: minmax(0, 1.25fr) minmax(260px, .85fr);
   align-items: center;
 }
+.hero:after { display: none; }
 .hero-copy-content { position: relative; z-index: 2; }
 .hero-art {
   position: relative;
@@ -224,6 +225,10 @@ body.forum-modal-open{overflow:hidden}
   display: flex;
   align-items: center;
   justify-content: center;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
   opacity: 1;
   transform: none;
 }
@@ -231,13 +236,15 @@ body.forum-modal-open{overflow:hidden}
   display: block;
   width: 100%;
   max-width: 410px;
+  height: auto;
   aspect-ratio: 16 / 10;
   max-height: 280px;
-  object-fit: cover;
-  border: 5px solid rgba(255,255,255,.88);
-  border-radius: 20px;
-  background: #241c20;
-  box-shadow: 0 18px 38px rgba(62,28,34,.22);
+  object-fit: contain;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  outline: 0;
 }
 @media (max-width: 760px) {
   .hero {
@@ -263,7 +270,7 @@ body.forum-modal-open{overflow:hidden}
 }
 @media (max-width: 420px) {
   .hero-art { opacity: 1; }
-  .hero-video { max-height: 200px; border-width: 4px; border-radius: 16px; }
+  .hero-video { max-height: 200px; }
 }
 
 </style>
@@ -306,7 +313,7 @@ body.forum-modal-open{overflow:hidden}
     </header>
     <main class="main">
       <section class="view active" id="view-home" aria-labelledby="home-title">
-        <div class="hero"><div class="hero-copy-content"><div class="eyebrow">Your school. Your voice. One platform.</div><h1 id="home-title">Stay informed.<br><span>Speak up.</span><br>Make a difference.</h1><p class="hero-copy">A central place for the TNHS community to report facility concerns, keep up with school announcements, and find important contacts.</p><div class="hero-actions"><button class="btn btn-primary" data-go="report">Report a concern</button><button class="btn btn-soft" data-go="updates">View announcements</button></div></div><div class="hero-art"><video class="hero-video" controls autoplay muted loop playsinline preload="metadata" aria-label="TAPP student community video"><source src="./videos/student.mp4" type="video/mp4">Your browser does not support embedded video.</video></div></div>
+        <div class="hero"><div class="hero-copy-content"><div class="eyebrow">Your school. Your voice. One platform.</div><h1 id="home-title">Stay informed.<br><span>Speak up.</span><br>Make a difference.</h1><p class="hero-copy">A central place for the TNHS community to report facility concerns, keep up with school announcements, and find important contacts.</p><div class="hero-actions"><button class="btn btn-primary" data-go="report">Report a concern</button><button class="btn btn-soft" data-go="updates">View announcements</button></div></div><div class="hero-art"><video id="heroStudentVideo" class="hero-video" autoplay muted loop playsinline preload="auto" disablepictureinpicture disableremoteplayback aria-label="TAPP student community video"><source src="./videos/student.mp4" type="video/mp4">Your browser does not support embedded video.</video></div></div>
         <div class="section-head"><div><h2>What do you need today?</h2><p>Quick access to the services of TAPP.</p></div></div>
         <div class="quick-grid">
           <button class="quick-card" data-go="report"><span class="quick-icon image-slot" data-image-slot="facility-report" role="img" aria-label="Facility report"></span><span><strong>Report a facility issue</strong><small>Tell the school about damage or maintenance needs.</small></span></button>
@@ -459,6 +466,15 @@ body.forum-modal-open{overflow:hidden}
     avatar.style.backgroundSize = 'cover';
     avatar.style.backgroundPosition = 'center';
     avatar.setAttribute('aria-label', signedInUser?.photoURL ? 'Google profile photo' : 'Default profile image');
+
+    // The app is initially hidden behind the sign-in screen. Start the muted hero video
+    // again after the app becomes visible so autoplay works after sign-in/demo entry.
+    const heroVideo = $('heroStudentVideo');
+    if (heroVideo) {
+      heroVideo.muted = true;
+      const playAttempt = heroVideo.play();
+      if (playAttempt && typeof playAttempt.catch === 'function') playAttempt.catch(() => {});
+    }
   };
   const showAuth=()=>{$('appShell').classList.add('hidden');$('authScreen').classList.remove('hidden');};
   const loadExternalScript=src=>new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=src;script.async=true;script.onload=resolve;script.onerror=()=>reject(new Error('Could not load a Firebase SDK library. Check your internet connection.'));document.head.appendChild(script);});
@@ -520,7 +536,7 @@ body.forum-modal-open{overflow:hidden}
   $('googleSignIn').addEventListener('click',signInWithGoogle);
   $('demoSignIn').addEventListener('click',()=>{isDemoSession=true;localStorage.setItem('tapp_demo_session','yes');signedInUser=null;role='student';revealApp();showToast('Demo session started. Data stays on this device.');});
   $('signOut').addEventListener('click',async()=>{try{if(firebaseAuth&&signedInUser)await firebaseAuth.signOut();}catch(error){console.error(error);}isDemoSession=false;signedInUser=null;localStorage.removeItem('tapp_demo_session');role='student';$('profileAvatar').style.backgroundImage='';showAuth();});
-  const setPage=page=>{currentPage=page;document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===`view-${page}`));document.querySelectorAll('.nav-btn,.side-nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===page));window.scrollTo({top:0,behavior:'smooth'});render();};
+  const setPage=page=>{currentPage=page;document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===`view-${page}`));document.querySelectorAll('.nav-btn,.side-nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===page));const heroVideo=$('heroStudentVideo');if(heroVideo){if(page==='home'){heroVideo.muted=true;const playAttempt=heroVideo.play();if(playAttempt&&typeof playAttempt.catch==='function')playAttempt.catch(()=>{});}else{heroVideo.pause();}}window.scrollTo({top:0,behavior:'smooth'});render();};
   const renderHome=()=>{
     const anns=[...data.announcements].slice(0,2);
     $('homeAnnouncements').innerHTML=anns.length?anns.map(a=>`<div class="announcement-mini"><span class="tag">${esc(a.category)}</span><h4>${esc(a.title)}</h4><p>${esc(a.body.slice(0,125))}${a.body.length>125?'…':''}</p></div>`).join(''):'<div class="empty">No announcements have been posted.</div>';
