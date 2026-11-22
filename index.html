@@ -246,7 +246,10 @@ body{background-image:radial-gradient(ellipse at 10% 5%,rgba(232,190,198,.46),tr
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="./firebase-config.js"></script>
-<script>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/13.4.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/13.4.0/firebase-auth-compat.js"></script><script>
 (() => {
   const STORE_KEY = 'tapp_prototype_v1';
   const initialData = {
