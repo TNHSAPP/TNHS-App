@@ -1,0 +1,8 @@
+Add these lines inside the existing <head> element of index.html, just after the description meta tag and before <title>:
+
+<link rel="manifest" href="./manifest.webmanifest" />
+<link rel="apple-touch-icon" href="./tapp-180.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="TAPP" />
+
+Only add them once. Do not replace your existing <head> or page content.

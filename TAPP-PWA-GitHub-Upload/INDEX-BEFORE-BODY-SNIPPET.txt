@@ -1,0 +1,13 @@
+Add this script immediately before the closing </body> tag in index.html:
+
+<script>
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js')
+      .then(registration => console.info('TAPP service worker ready:', registration.scope))
+      .catch(error => console.error('TAPP service worker registration failed:', error));
+  });
+}
+</script>
+
+Only add this if index.html does not already contain a service-worker registration block.
