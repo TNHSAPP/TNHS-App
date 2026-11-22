@@ -273,26 +273,67 @@ body.forum-modal-open{overflow:hidden}
   .hero-video { max-height: 200px; }
 }
 
+
+/* Full-viewport loading overlay. The overlay never changes the app shell dimensions. */
+.loading-screen{
+  position:fixed;inset:0;z-index:5000;display:grid;place-items:center;
+  min-height:100vh;min-height:100dvh;padding:24px;color:#fff;overflow:hidden;
+  isolation:isolate;
+  background:linear-gradient(125deg,#541020 0%,#801526 32%,#b52b3c 67%,#631326 100%);
+  background-size:260% 260%;animation:loadingGradientFlow 20s ease-in-out infinite;
+}
+.loading-screen.hidden{display:none!important}
+.loading-screen::before{
+  content:"";position:absolute;z-index:-1;inset:-24%;pointer-events:none;
+  background:
+    radial-gradient(ellipse at 18% 28%,rgba(255,218,115,.34),transparent 27%),
+    radial-gradient(ellipse at 78% 30%,rgba(255,255,255,.20),transparent 25%),
+    radial-gradient(ellipse at 52% 78%,rgba(220,73,105,.42),transparent 34%),
+    radial-gradient(ellipse at 88% 82%,rgba(255,190,104,.20),transparent 24%);
+  filter:blur(18px);transform:translate3d(-2%,0,0) scale(1.02);
+  animation:loadingAuroraDrift 16s ease-in-out infinite alternate;
+}
+.loading-screen::after{
+  content:"";position:absolute;z-index:-1;inset:0;pointer-events:none;opacity:.34;
+  background-image:
+    radial-gradient(circle,rgba(255,255,255,.72) 1px,transparent 1.8px),
+    radial-gradient(circle,rgba(255,225,158,.62) 1px,transparent 2px),
+    radial-gradient(circle,rgba(255,255,255,.34) 1px,transparent 1.7px);
+  background-size:118px 118px,183px 183px,257px 257px;
+  background-position:0 0,63px 91px,121px 37px;
+  animation:loadingParticlesDrift 32s linear infinite;
+}
+.loading-content{position:relative;z-index:1;width:min(100%,520px);display:flex;flex-direction:column;align-items:center;text-align:center;gap:15px}
+.loading-logo{
+  display:block;width:min(190px,48vw);height:clamp(112px,20vh,170px);
+  object-fit:contain;object-position:center;border:0;border-radius:0;outline:0;
+  background:transparent;box-shadow:none;
+}
+.loading-tagline{margin:1px 0 3px;font-size:clamp(12px,2.6vw,15px);font-weight:750;letter-spacing:.035em;color:#fff7e8}
+.loading-percentage{font-size:clamp(30px,6vw,42px);line-height:1;font-weight:900;font-variant-numeric:tabular-nums;color:#ffdc69;font-feature-settings:"tnum"}
+.loading-track{width:min(100%,300px);height:7px;border-radius:999px;background:rgba(255,255,255,.2);overflow:hidden}
+.loading-progress-fill{width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#f4c52e,#ffe58b);box-shadow:0 0 14px rgba(255,218,105,.42);will-change:width}
+.loading-status{min-height:15px;margin:0;color:rgba(255,255,255,.76);font-size:10px;letter-spacing:.04em}
+@keyframes loadingGradientFlow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@keyframes loadingAuroraDrift{0%{transform:translate3d(-3%,-2%,0) rotate(-3deg) scale(1)}100%{transform:translate3d(3%,2%,0) rotate(5deg) scale(1.08)}}
+@keyframes loadingParticlesDrift{0%{background-position:0 0,63px 91px,121px 37px}100%{background-position:0 -236px,63px -274px,121px -337px}}
+@media(max-width:420px){.loading-content{gap:13px}.loading-logo{width:min(165px,46vw);height:clamp(100px,18vh,145px)}}
+@media(prefers-reduced-motion:reduce){.loading-screen,.loading-screen::before,.loading-screen::after{animation:none!important}}
+
 </style>
 </head>
 <body>
-<section class="auth-screen" id="authScreen" aria-label="TAPP sign in">
-  <div class="auth-card">
-    <div class="auth-brand-row">
-      <div class="auth-logo image-slot" data-image-slot="school-seal" role="img" aria-label="TNHS school seal"><span class="image-slot-label">SCHOOL IMAGE</span></div>
-      <div><div class="auth-brand-name">TAPP</div><div class="auth-brand-sub">TARLAC NATIONAL HIGH SCHOOL</div></div>
+<section class="loading-screen" id="loadingScreen" aria-label="TAPP loading screen">
+  <div class="loading-content">
+    <!-- Replace this file with your logo: icons/tapp-logo.png -->
+    <img id="loadingLogo" class="loading-logo" src="./icons/tapp-logo.png" alt="TAPP logo" decoding="async" />
+    <p class="loading-tagline">Your School. Your Voice. One Platform.</p>
+    <div class="loading-percentage" id="loadingPercentage" role="status" aria-live="polite">0.0%</div>
+    <div class="loading-track" role="progressbar" aria-label="Loading TAPP" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="loadingProgressTrack">
+      <div class="loading-progress-fill" id="loadingProgressFill"></div>
     </div>
-    <div class="auth-eyebrow">Tarlac National High School</div>
-    <h1 class="auth-title">Your school.<br><span>Your voice.</span></h1>
-    <p class="auth-copy">Sign in to access school announcements, report facility concerns, connect with the TNHS community, and find important contacts.</p>
-    <button class="google-btn" id="googleSignIn" type="button"><span class="google-mark" aria-hidden="true">G</span><span>Continue with Google</span></button>
-    <div class="auth-divider"><span>or</span></div>
-    <button class="btn btn-soft demo-btn" id="demoSignIn" type="button">Explore the prototype</button>
-    <button class="btn btn-primary demo-btn hidden" id="installAppButton" type="button">Install TAPP App</button>
-    <p class="auth-status" id="authStatus" role="status" aria-live="polite">Sign in with your Google account to continue. For first-time setup, Google Authentication must be enabled in the TNHS Firebase project.</p>
-    <div class="auth-foot">For the TNHS school community</div>
+    <p class="loading-status" id="loadingStatus">Preparing your school platform...</p>
   </div>
-  <div class="auth-background-note">PROJECT TAPP · SCHOOL ASSISTANCE AND PUBLIC PLATFORM</div>
 </section>
 
 <div class="app-shell hidden" id="appShell">
@@ -309,7 +350,7 @@ body.forum-modal-open{overflow:hidden}
   <div class="app-workspace">
     <header class="topbar">
       <div class="brand"><div class="crest image-slot" data-image-slot="school-seal" role="img" aria-label="TNHS school seal"></div><div><div class="brand-name">TAPP</div><div class="brand-sub">TARLAC NATIONAL HIGH SCHOOL</div></div></div>
-      <div class="top-actions"><div class="account-block"><span class="account-name" id="accountName">Demo Student</span><span class="account-email" id="accountEmail">Prototype session</span></div><button class="role-pill" id="roleToggle" type="button" title="Prototype-only admin preview. Real admin access must use server-verified permissions.">Admin preview</button><div class="avatar image-slot" id="profileAvatar" data-image-slot="profile" role="img" aria-label="Profile image"></div><button class="signout-btn" id="signOut" type="button">Sign out</button></div>
+      <div class="top-actions"><div class="account-block"><span class="account-name" id="accountName">Demo Student</span><span class="account-email" id="accountEmail">Prototype session</span></div><button class="role-pill" id="roleToggle" type="button" title="Prototype-only admin preview. Real admin access must use server-verified permissions.">Admin preview</button><div class="avatar image-slot" id="profileAvatar" data-image-slot="profile" role="img" aria-label="Profile image"></div><span class="signout-btn" aria-label="Guest access">Guest access</span></div>
     </header>
     <main class="main">
       <section class="view active" id="view-home" aria-labelledby="home-title">
@@ -390,10 +431,6 @@ body.forum-modal-open{overflow:hidden}
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="./firebase-config.js"></script>
-<script src="https://www.gstatic.com/firebasejs/13.4.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/13.4.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore-compat.js"></script>
 <script>
 (() => {
   'use strict';
@@ -431,10 +468,8 @@ body.forum-modal-open{overflow:hidden}
     data = cloneInitialData();
   }
   let role='student';
-  let isDemoSession=localStorage.getItem('tapp_demo_session')==='yes';
+  let isDemoSession=true;
   let signedInUser=null;
-  let firebaseAuth=null;
-  let firebaseDb=null;
   let currentPage='home';
   let announcementFilter='All';
   let pendingPhoto='';
@@ -446,96 +481,27 @@ body.forum-modal-open{overflow:hidden}
   const showToast=message=>{const t=$('toast');t.textContent=message;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2800);};
   const dateLabel=()=>new Date().toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});
   const statusClass=s=>({'Submitted':'submitted','Under review':'reviewing','In progress':'progress','Resolved':'resolved'}[s]||'submitted');
-  const firebaseConfig=window.TAPP_FIREBASE_CONFIG||{};
-  const firebaseConfigured=Boolean(firebaseConfig.apiKey&&firebaseConfig.authDomain&&firebaseConfig.projectId&&firebaseConfig.appId&&![firebaseConfig.apiKey,firebaseConfig.authDomain,firebaseConfig.projectId,firebaseConfig.appId].some(value=>String(value).includes('YOUR_')));
-  const setAuthStatus=message=>{if($('authStatus'))$('authStatus').textContent=message;};
   const revealApp=()=>{
-    $('authScreen').classList.add('hidden');$('appShell').classList.remove('hidden');
-    const displayName=signedInUser?.displayName||(isDemoSession?'TAPP Demo Student':'TNHS Student');
-    const email=signedInUser?.email||(isDemoSession?'Prototype session':'');
+    $('loadingScreen').classList.add('hidden');$('appShell').classList.remove('hidden');
+    const displayName='TNHS Student';
+    const email='Guest access';
     $('accountName').textContent=displayName;
     $('accountEmail').textContent=email;
     $('postName').value=displayName;
 
-    // Always clear the previous account's photo before applying this user's photo.
-    // The image-assets handler will display images/profile.png when photoURL is empty.
-    const avatar = $('profileAvatar');
-    avatar.style.backgroundImage = signedInUser?.photoURL
-      ? `url("${signedInUser.photoURL.replace(/"/g, '%22')}")`
-      : '';
-    avatar.style.backgroundSize = 'cover';
-    avatar.style.backgroundPosition = 'center';
-    avatar.setAttribute('aria-label', signedInUser?.photoURL ? 'Google profile photo' : 'Default profile image');
+    const avatar=$('profileAvatar');
+    avatar.style.backgroundImage='';
+    avatar.style.backgroundSize='cover';
+    avatar.style.backgroundPosition='center';
+    avatar.setAttribute('aria-label','Default profile image');
 
-    // The app is initially hidden behind the sign-in screen. Start the muted hero video
-    // again after the app becomes visible so autoplay works after sign-in/demo entry.
-    const heroVideo = $('heroStudentVideo');
-    if (heroVideo) {
-      heroVideo.muted = true;
-      const playAttempt = heroVideo.play();
-      if (playAttempt && typeof playAttempt.catch === 'function') playAttempt.catch(() => {});
+    const heroVideo=$('heroStudentVideo');
+    if(heroVideo){
+      heroVideo.muted=true;
+      const playAttempt=heroVideo.play();
+      if(playAttempt&&typeof playAttempt.catch==='function')playAttempt.catch(()=>{});
     }
   };
-  const showAuth=()=>{$('appShell').classList.add('hidden');$('authScreen').classList.remove('hidden');};
-  const loadExternalScript=src=>new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=src;script.async=true;script.onload=resolve;script.onerror=()=>reject(new Error('Could not load a Firebase SDK library. Check your internet connection.'));document.head.appendChild(script);});
-  let firebaseLoadPromise=null;
-  const ensureFirebaseSdk=async()=>{
-    if(window.firebase?.auth&&window.firebase?.firestore)return window.firebase;
-    if(!firebaseLoadPromise)firebaseLoadPromise=(async()=>{if(!window.firebase?.initializeApp)await loadExternalScript('https://www.gstatic.com/firebasejs/13.4.0/firebase-app-compat.js');if(!window.firebase?.auth)await loadExternalScript('https://www.gstatic.com/firebasejs/13.4.0/firebase-auth-compat.js');if(!window.firebase?.firestore)await loadExternalScript('https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore-compat.js');return window.firebase;})();
-    return firebaseLoadPromise;
-  };
-  const ensureFirebaseAuth=async()=>{
-    await ensureFirebaseSdk();if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);firebaseAuth=firebase.auth();
-    if(typeof firebase.firestore!=='function')throw new Error('Firebase Firestore SDK did not load. Refresh the page and check your internet connection.');
-    firebaseDb=firebase.firestore();
-    try{await firebaseAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);}catch(error){console.warn('Could not set Firebase auth persistence:',error);}
-    return firebaseAuth;
-  };
-  const authErrorMessage=error=>{
-    const code=error?.code||'';
-    const messages={
-      'auth/operation-not-allowed':'Google sign-in is not enabled in Firebase yet. In Firebase Console, open Authentication → Sign-in method, enable Google, and save.',
-      'auth/unauthorized-domain':`This website domain is not authorized in Firebase. Add "${location.hostname}" under Authentication → Settings → Authorized domains.`,
-      'auth/popup-blocked':'Your browser blocked the Google sign-in window. Allow pop-ups for this site and try again.',
-      'auth/popup-closed-by-user':'The Google sign-in window was closed before sign-in finished. Try again when ready.',
-      'auth/cancelled-popup-request':'A Google sign-in request is already in progress. Please try again in a moment.',
-      'auth/network-request-failed':'A network error interrupted Google sign-in. Check your internet connection and try again.',
-      'auth/too-many-requests':'Too many sign-in attempts were made. Please wait a little while before trying again.',
-      'auth/invalid-api-key':'Firebase rejected the API key. Check the Firebase web app configuration.',
-      'auth/invalid-oauth-client-id':'The Google sign-in client is not configured correctly in the Firebase project.'
-    };
-    return messages[code]||error?.message||'Google sign-in could not be completed. Check the Firebase setup and try again.';
-  };
-  const applyAuthenticatedUser=async user=>{
-    signedInUser=user||null;role='student';
-    if(user){isDemoSession=false;localStorage.removeItem('tapp_demo_session');try{const token=await user.getIdTokenResult();if(token?.claims?.admin===true)role='staff';}catch{role='student';}revealApp();render();}
-    else if(!isDemoSession)showAuth();
-  };
-  const initializeFirebaseAuth=async()=>{
-    await ensureFirebaseAuth();firebaseAuth.onAuthStateChanged(user=>{applyAuthenticatedUser(user);});
-    try{await firebaseAuth.getRedirectResult();}catch(error){console.error('Google redirect sign-in failed:',error);setAuthStatus(authErrorMessage(error));showAuth();}
-  };
-  const signInWithGoogle=async()=>{
-    if(location.protocol==='file:'){setAuthStatus('Google sign-in cannot run from a file:// address. Start a local web server (for example, python -m http.server 8000) and open http://localhost:8000, or use your approved HTTPS school website.');showToast('Open TAPP through localhost or an HTTPS website.');return;}
-    if(!firebaseConfigured){setAuthStatus('Firebase configuration is missing. Check firebase-config.js before signing in.');showToast('Google sign-in setup is required.');return;}
-    const button=$('googleSignIn');const originalButtonText=button.innerHTML;button.disabled=true;button.style.opacity='.7';button.querySelector('span:last-child').textContent='Connecting to Google…';setAuthStatus('Opening secure Google sign-in…');
-    try{
-      await ensureFirebaseAuth();const provider=new firebase.auth.GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});
-      const isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.maxTouchPoints>1&&window.innerWidth<900);
-      if(isMobile){isDemoSession=false;localStorage.removeItem('tapp_demo_session');await firebaseAuth.signInWithRedirect(provider);return;}
-      const credential=await firebaseAuth.signInWithPopup(provider);await applyAuthenticatedUser(credential.user);
-    }catch(error){
-      console.error('Google sign-in failed:',error);
-      if(error?.code==='auth/popup-blocked'){try{const provider=new firebase.auth.GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});isDemoSession=false;localStorage.removeItem('tapp_demo_session');await firebaseAuth.signInWithRedirect(provider);return;}catch(redirectError){console.error('Google redirect fallback failed:',redirectError);setAuthStatus(authErrorMessage(redirectError));}}
-      else setAuthStatus(authErrorMessage(error));
-    }finally{button.disabled=false;button.style.opacity='';button.innerHTML=originalButtonText;}
-  };
-  if(isDemoSession)revealApp();
-  else if(firebaseConfigured)initializeFirebaseAuth().catch(error=>{console.error('Firebase initialization failed:',error);setAuthStatus('Could not connect to Firebase. Check your configuration and internet connection, or use the prototype demo.');showAuth();});
-  else showAuth();
-  $('googleSignIn').addEventListener('click',signInWithGoogle);
-  $('demoSignIn').addEventListener('click',()=>{isDemoSession=true;localStorage.setItem('tapp_demo_session','yes');signedInUser=null;role='student';revealApp();showToast('Demo session started. Data stays on this device.');});
-  $('signOut').addEventListener('click',async()=>{try{if(firebaseAuth&&signedInUser)await firebaseAuth.signOut();}catch(error){console.error(error);}isDemoSession=false;signedInUser=null;localStorage.removeItem('tapp_demo_session');role='student';$('profileAvatar').style.backgroundImage='';showAuth();});
   const setPage=page=>{currentPage=page;document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===`view-${page}`));document.querySelectorAll('.nav-btn,.side-nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===page));const heroVideo=$('heroStudentVideo');if(heroVideo){if(page==='home'){heroVideo.muted=true;const playAttempt=heroVideo.play();if(playAttempt&&typeof playAttempt.catch==='function')playAttempt.catch(()=>{});}else{heroVideo.pause();}}window.scrollTo({top:0,behavior:'smooth'});render();};
   const renderHome=()=>{
     const anns=[...data.announcements].slice(0,2);
@@ -636,11 +602,36 @@ body.forum-modal-open{overflow:hidden}
     });
   }
   $('reportForm').addEventListener('submit',e=>{e.preventDefault();const report={id:uid('TAPP'),category:$('reportCategory').value,location:$('reportLocation').value.trim(),title:$('reportTitle').value.trim(),details:$('reportDetails').value.trim(),photo:pendingPhoto,status:'Submitted',date:dateLabel()};if(!report.category||!report.location||!report.title||!report.details||!pendingPhoto||!$('reportConfirm').checked){showToast(!pendingPhoto?'Photo evidence is required to submit a report.':'Please complete all required fields.');if(!pendingPhoto)$('reportPhoto').focus();return;}data.reports.push(report);save();e.target.reset();pendingPhoto='';$('photoPreview').innerHTML='';renderReports();renderHome();showToast(`Report submitted. Reference: ${report.id.slice(-7).toUpperCase()}`);});
-  $('postForm').addEventListener('submit',e=>{e.preventDefault();const p={id:uid('post'),name:$('postName').value.trim(),title:$('postTitle').value.trim(),body:$('postBody').value.trim(),date:dateLabel(),visibility:$('postVisibility').value,reactions:{support:0,helpful:0,thanks:0},comments:[]};if(!p.name||!p.title||!p.body)return;data.posts.push(p);save();e.target.reset();$('postName').value=signedInUser?.displayName||(isDemoSession?'TAPP Demo Student':'TNHS Student');$('postVisibility').value='public';closePostComposer();renderForum();showToast(p.visibility==='admin'?'Post sent to the admin-only demo inbox.':'Public post published to the demo feed.');});
-  $('forumPosts').addEventListener('submit',e=>{const form=e.target.closest('[data-comment-form]');if(!form)return;e.preventDefault();const post=data.posts.find(item=>item.id===form.dataset.commentForm);const input=form.querySelector('[name="commentText"]');const text=input.value.trim();if(!post||!text)return;post.comments=post.comments||[];post.comments.push({id:uid('comment'),name:signedInUser?.displayName||(isDemoSession?'TAPP Demo Student':'TNHS Student'),text,date:dateLabel(),parentId:input.dataset.parentId||null});save();renderForum();showToast('Comment added.');});
+  $('postForm').addEventListener('submit',e=>{e.preventDefault();const p={id:uid('post'),name:$('postName').value.trim(),title:$('postTitle').value.trim(),body:$('postBody').value.trim(),date:dateLabel(),visibility:$('postVisibility').value,reactions:{support:0,helpful:0,thanks:0},comments:[]};if(!p.name||!p.title||!p.body)return;data.posts.push(p);save();e.target.reset();$('postName').value='TNHS Student';$('postVisibility').value='public';closePostComposer();renderForum();showToast(p.visibility==='admin'?'Post sent to the admin-only demo inbox.':'Public post published to the demo feed.');});
+  $('forumPosts').addEventListener('submit',e=>{const form=e.target.closest('[data-comment-form]');if(!form)return;e.preventDefault();const post=data.posts.find(item=>item.id===form.dataset.commentForm);const input=form.querySelector('[name="commentText"]');const text=input.value.trim();if(!post||!text)return;post.comments=post.comments||[];post.comments.push({id:uid('comment'),name:'TNHS Student',text,date:dateLabel(),parentId:input.dataset.parentId||null});save();renderForum();showToast('Comment added.');});
   document.addEventListener('change',e=>{const id=e.target.dataset.statusId;if(id){const r=data.reports.find(x=>x.id===id);if(r){r.status=e.target.value;save();renderReports();renderHome();showToast('Report status updated.');}}});
   $('announcementAdmin').addEventListener('submit',e=>{if(e.target.id!=='announcementForm')return;e.preventDefault();const a={id:uid('ann'),category:$('annCategory').value,title:$('annTitle').value.trim(),body:$('annBody').value.trim(),date:dateLabel(),pinned:false};if(!a.title||!a.body)return;data.announcements.unshift(a);save();renderAnnouncements();renderHome();showToast('Announcement published to this device’s demo feed.');});
   render();
+})();
+</script>
+
+
+<script>
+// Tracks actual asset completion so slower connections naturally take longer to reach 100%.
+window.TAPP_ASSET_TRACKER = (() => {
+  const listeners = new Set();
+  const state = { total: 0, completed: 0 };
+  state.begin = () => {
+    state.total += 1;
+    listeners.forEach(listener => listener(state));
+    let finished = false;
+    return () => {
+      if (finished) return;
+      finished = true;
+      state.completed = Math.min(state.total, state.completed + 1);
+      listeners.forEach(listener => listener(state));
+    };
+  };
+  state.subscribe = listener => {
+    listeners.add(listener);
+    return () => listeners.delete(listener);
+  };
+  return state;
 })();
 </script>
 
@@ -688,11 +679,13 @@ body.forum-modal-open{overflow:hidden}
       if(slot.dataset.imageChecked===path)continue;
       slot.dataset.imageChecked=path;
       const tester=new Image();
-      tester.onload=()=>slot.classList.remove('image-missing');
+      const finishTrackedImage=window.TAPP_ASSET_TRACKER?.begin?.()||(()=>{});
+      tester.onload=()=>{slot.classList.remove('image-missing');finishTrackedImage();};
       tester.onerror=()=>{
         slot.classList.add('image-missing');
         slot.style.backgroundImage='none';
         slot.setAttribute('aria-label',`${slot.getAttribute('aria-label')||'TAPP'} image is missing: ${path}`);
+        finishTrackedImage();
       };
       tester.src=path;
     }
@@ -792,6 +785,112 @@ body.forum-modal-open{overflow:hidden}
   document.addEventListener('click', (event) => {
     if (event.target.closest?.('.side-nav-btn, .nav-btn')) playNavigationPop('click');
   }, true);
+})();
+</script>
+
+
+<script>
+(() => {
+  'use strict';
+  const screen = document.getElementById('loadingScreen');
+  const logo = document.getElementById('loadingLogo');
+  const percentage = document.getElementById('loadingPercentage');
+  const fill = document.getElementById('loadingProgressFill');
+  const track = document.getElementById('loadingProgressTrack');
+  const status = document.getElementById('loadingStatus');
+  const tracker = window.TAPP_ASSET_TRACKER;
+  if (!screen || !logo || !percentage || !fill || !track || !status || !tracker) return;
+
+  let pageLoaded = document.readyState === 'complete';
+  let progress = 0;
+  let target = 4;
+  let readyLogo = 0;
+  let finished = false;
+  let lastFrameTime = 0;
+
+  const markLogoReady = () => {
+    if (logo.dataset.loadingTracked === 'done') return;
+    logo.dataset.loadingTracked = 'done';
+    readyLogo = 1;
+    updateTarget();
+  };
+
+  logo.addEventListener('load', markLogoReady, { once: true });
+  logo.addEventListener('error', () => {
+    // Use the existing TNHS seal as a fallback until icons/tapp-logo.png is supplied.
+    if (logo.dataset.fallbackTried !== 'yes') {
+      logo.dataset.fallbackTried = 'yes';
+      logo.src = './icons/tnhslogo.png';
+      if (logo.complete && logo.naturalWidth > 0) markLogoReady();
+    } else {
+      markLogoReady();
+    }
+  });
+  if (logo.complete) {
+    if (logo.naturalWidth > 0) markLogoReady();
+    else if (logo.dataset.fallbackTried !== 'yes') {
+      logo.dataset.fallbackTried = 'yes';
+      logo.src = './icons/tnhslogo.png';
+    }
+  }
+
+  function updateTarget() {
+    const assetRatio = tracker.total ? tracker.completed / tracker.total : 1;
+    const logoRatio = readyLogo ? 1 : 0;
+    const completionRatio = (assetRatio * 0.88) + (logoRatio * 0.12);
+    target = Math.max(target, Math.min(94, 5 + completionRatio * 89));
+    if (pageLoaded && tracker.completed >= tracker.total && readyLogo) target = 100;
+  }
+
+  tracker.subscribe(updateTarget);
+  window.addEventListener('load', () => {
+    pageLoaded = true;
+    updateTarget();
+  }, { once: true });
+  if (pageLoaded) updateTarget();
+
+  function revealApp() {
+    screen.classList.add('hidden');
+    document.getElementById('appShell')?.classList.remove('hidden');
+    const name = document.getElementById('accountName');
+    const email = document.getElementById('accountEmail');
+    const postName = document.getElementById('postName');
+    if (name) name.textContent = 'TNHS Student';
+    if (email) email.textContent = 'Guest access';
+    if (postName) postName.value = 'TNHS Student';
+    const hero = document.getElementById('heroStudentVideo');
+    if (hero) {
+      hero.muted = true;
+      const attempt = hero.play();
+      if (attempt && typeof attempt.catch === 'function') attempt.catch(() => {});
+    }
+  }
+
+  function animate(now) {
+    updateTarget();
+    const delta = lastFrameTime ? Math.min(now - lastFrameTime, 64) : 16.7;
+    lastFrameTime = now;
+
+    // Time-based easing keeps the number and bar moving smoothly at different frame rates.
+    const easing = 1 - Math.exp(-delta / 430);
+    progress += (target - progress) * easing;
+    if (target === 100 && 100 - progress < 0.12) progress = 100;
+    progress = Math.min(100, Math.max(0, progress));
+
+    const shown = progress >= 100 ? '100.0' : progress.toFixed(1);
+    percentage.textContent = shown + '%';
+    fill.style.width = progress.toFixed(3) + '%';
+    track.setAttribute('aria-valuenow', progress.toFixed(1));
+
+    if (progress >= 100 && !finished) {
+      finished = true;
+      status.textContent = 'Welcome to TAPP';
+      window.setTimeout(revealApp, 260);
+      return;
+    }
+    requestAnimationFrame(animate);
+  }
+  requestAnimationFrame(animate);
 })();
 </script>
 
