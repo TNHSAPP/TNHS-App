@@ -195,7 +195,7 @@ body{background-image:radial-gradient(ellipse at 10% 5%,rgba(232,190,198,.46),tr
       </div>
       <div class="home-columns">
         <div class="panel"><div class="panel-title"><h3>Latest announcements</h3><button class="text-link" data-go="updates">See all</button></div><div id="homeAnnouncements"></div></div>
-        <div class="panel"><div class="panel-title"><h3>TAPP at a glance</h3><span>Account dashboard</span></div><div class="stat-grid"><div class="stat"><strong id="homeReportCount">0</strong><small>Reports submitted</small></div><div class="stat"><strong id="homeResolvedCount">0</strong><small>Marked resolved</small></div></div><div class="notice"><strong>Firestore connection test</strong><button class="mini-btn" id="firestoreTestButton" type="button">Test cloud database</button><div id="firestoreStatus" role="status" aria-live="polite" style="margin-top:8px">Sign in with Google, then test the Firestore connection.</div></div><div class="notice"><strong>Need urgent help?</strong>For immediate danger or a medical emergency, contact school personnel directly or use verified emergency services. Do not rely on this prototype as an emergency dispatch service.</div></div>
+        <div class="panel"><div class="panel-title"><h3>TAPP at a glance</h3><span>On this device</span></div><div class="stat-grid"><div class="stat"><strong id="homeReportCount">0</strong><small>Reports submitted</small></div><div class="stat"><strong id="homeResolvedCount">0</strong><small>Marked resolved</small></div></div><div class="notice"><strong>Need urgent help?</strong>For immediate danger or a medical emergency, contact school personnel directly or use verified emergency services. Do not rely on this demo app as an emergency dispatch service.</div></div>
       </div>
       <p class="footer-note">TAPP prototype • Tarlac National High School • Sample interface for pilot testing</p>
     </section>
@@ -247,7 +247,7 @@ body{background-image:radial-gradient(ellipse at 10% 5%,rgba(232,190,198,.46),tr
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="./firebase-config.js"></script>
 
-<!-- Firebase SDK -->
+<!-- Firebase SDK: keep all compat libraries on the same SDK version. -->
 <script src="https://www.gstatic.com/firebasejs/13.4.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/13.4.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore-compat.js"></script>
@@ -278,7 +278,7 @@ body{background-image:radial-gradient(ellipse at 10% 5%,rgba(232,190,198,.46),tr
   let isDemoSession = localStorage.getItem('tapp_demo_session') === 'yes';
   let signedInUser = null;
   let firebaseAuth = null;
-  let firestoreDb = null;
+  let firebaseDb = null;
   let currentPage = 'home';
   let announcementFilter = 'All';
   let pendingPhoto = '';
@@ -314,14 +314,14 @@ body{background-image:radial-gradient(ellipse at 10% 5%,rgba(232,190,198,.46),tr
     script.src = src;
     script.async = true;
     script.onload = resolve;
-    script.onerror = () => reject(new Error('Could not load Firebase Authentication. Check your internet connection.'));
+    script.onerror = () => reject(new Error('Could not load a Firebase SDK library. Check your internet connection.'));
     document.head.appendChild(script);
   });
   let firebaseLoadPromise = null;
   const ensureFirebaseSdk = async () => {
     if (window.firebase?.auth && window.firebase?.firestore) return window.firebase;
     if (!firebaseLoadPromise) firebaseLoadPromise = (async () => {
-      if (!window.firebase?.apps) {
+      if (!window.firebase?.initializeApp) {
         await loadExternalScript('https://www.gstatic.com/firebasejs/13.4.0/firebase-app-compat.js');
       }
       if (!window.firebase?.auth) {
@@ -338,18 +338,18 @@ body{background-image:radial-gradient(ellipse at 10% 5%,rgba(232,190,198,.46),tr
     await ensureFirebaseSdk();
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     firebaseAuth = firebase.auth();
+    if (typeof firebase.firestore !== 'function') {
+      throw new Error('Firebase Firestore SDK did not load. Refresh the page and check your internet connection.');
+    }
+    // Initialize the Firestore client for the TAPP cloud-data integration.
+    // Existing app features still use localStorage until each collection is
+    // migrated with matching Firestore security rules.
+    firebaseDb = firebase.firestore();
     // Keep the user's Firebase session across reloads on this browser.
     try { await firebaseAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch (error) {
       console.warn('Could not set Firebase auth persistence:', error);
     }
     return firebaseAuth;
-  };
-  const ensureFirestore = async () => {
-    await ensureFirebaseSdk();
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    if (!firebase.firestore) throw new Error('The Firebase Firestore SDK did not load. Refresh the page and try again.');
-    if (!firestoreDb) firestoreDb = firebase.firestore();
-    return firestoreDb;
   };
   const authErrorMessage = error => {
     const code = error?.code || '';
@@ -476,46 +476,6 @@ body{background-image:radial-gradient(ellipse at 10% 5%,rgba(232,190,198,.46),tr
     $('profileAvatar').style.backgroundImage = '';
     $('profileAvatar').querySelector('.image-slot-label').textContent = 'PHOTO';
     showAuth();
-  });
-  $('firestoreTestButton').addEventListener('click', async () => {
-    const button = $('firestoreTestButton');
-    const status = $('firestoreStatus');
-    if (!signedInUser || isDemoSession) {
-      status.textContent = 'Please sign in with Google first. Prototype demo sessions cannot write to Firebase.';
-      return;
-    }
-    button.disabled = true;
-    status.textContent = 'Checking the connection to tapp-59c19…';
-    try {
-      const db = await ensureFirestore();
-      const testRef = db.collection('connectionTests').doc(signedInUser.uid);
-      await testRef.set({
-        uid: signedInUser.uid,
-        projectId: firebaseConfig.projectId,
-        connected: true,
-        lastCheckedAt: firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge: true });
-      const result = await testRef.get();
-      if (!result.exists || result.data()?.uid !== signedInUser.uid) {
-        throw new Error('The test document could not be verified after saving.');
-      }
-      status.textContent = `Connected successfully to Firebase project ${firebaseConfig.projectId}.`;
-      showToast('Firestore connection successful.');
-    } catch (error) {
-      console.error('Firestore connection test failed:', error);
-      if (error?.code === 'permission-denied') {
-        status.textContent = 'Firestore blocked this test. Add the connectionTests rule from FIREBASE-STEP-1.md, then try again.';
-      } else if (error?.code === 'not-found' || error?.code === 'failed-precondition') {
-        status.textContent = 'Firestore database may not be created yet. Open Firebase Console → Build → Firestore Database and create it.';
-      } else if (error?.code === 'unavailable') {
-        status.textContent = 'Firebase is temporarily unavailable. Check your internet connection and try again.';
-      } else {
-        status.textContent = `Connection test failed: ${error?.message || 'Unknown Firebase error'}`;
-      }
-      showToast('Firestore test did not pass. See the message on the dashboard.');
-    } finally {
-      button.disabled = false;
-    }
   });
   const setPage = page => { currentPage=page; document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===`view-${page}`)); document.querySelectorAll('.nav-btn,.side-nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===page)); window.scrollTo({top:0,behavior:'smooth'}); render(); };
   const renderHome = () => {
