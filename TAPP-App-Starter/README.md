@@ -1,2 +1,0 @@
-# TAPP
-A Research Project
