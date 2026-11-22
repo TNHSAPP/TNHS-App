@@ -2,9 +2,17 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#8e1727" />
 <meta name="description" content="TAPP — Tarlac National High School Assistance and Public Platform" />
+<meta name="application-name" content="TAPP" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="TAPP" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<link rel="manifest" href="./manifest.webmanifest" />
+<link rel="icon" type="image/png" sizes="192x192" href="./tapp-192.png" />
+<link rel="apple-touch-icon" href="./tapp-180.png" />
 <title>TAPP | TNHS</title>
 <style>
 :root{--wine:#8e1727;--red:#b51f32;--red2:#d83a43;--gold:#f4c52e;--gold2:#ffda59;--ink:#26232a;--muted:#77727b;--paper:#fff;--bg:#f5f3f5;--line:#e9e4e8;--soft:#fff5f3;--green:#24835c;--shadow:0 12px 32px rgba(55,20,33,.08);--radius:20px}
@@ -137,6 +145,9 @@ body{background-image:radial-gradient(ellipse at 10% 5%,rgba(232,190,198,.46),tr
   .auth-card{padding:26px 20px 22px;}
 }
 
+/* PWA install action */
+#installAppButton{margin-top:10px;}
+@media(display-mode:standalone){#installAppButton{display:none!important;}}
 </style>
 </head>
 <body>
@@ -152,6 +163,7 @@ body{background-image:radial-gradient(ellipse at 10% 5%,rgba(232,190,198,.46),tr
     <button class="google-btn" id="googleSignIn" type="button"><span class="google-mark" aria-hidden="true">G</span><span>Continue with Google</span></button>
     <div class="auth-divider"><span>or</span></div>
     <button class="btn btn-soft demo-btn" id="demoSignIn" type="button">Explore the prototype</button>
+    <button class="btn btn-primary demo-btn hidden" id="installAppButton" type="button">Install TAPP App</button>
     <p class="auth-status" id="authStatus" role="status" aria-live="polite">Sign in with your Google account to continue. For first-time setup, Google Authentication must be enabled in the TNHS Firebase project.</p>
     <div class="auth-foot">For the TNHS school community</div>
   </div>
@@ -536,6 +548,87 @@ body{background-image:radial-gradient(ellipse at 10% 5%,rgba(232,190,198,.46),tr
   document.addEventListener('change',e=>{const id=e.target.dataset.statusId;if(id){const r=data.reports.find(x=>x.id===id);if(r){r.status=e.target.value;save();renderReports();renderHome();showToast('Report status updated.');}}});
   $('announcementAdmin').addEventListener('submit',e=>{if(e.target.id!=='announcementForm')return;e.preventDefault();const a={id:uid('ann'),category:$('annCategory').value,title:$('annTitle').value.trim(),body:$('annBody').value.trim(),date:dateLabel(),pinned:false};if(!a.title||!a.body)return;data.announcements.unshift(a);save();renderAnnouncements();renderHome();showToast('Announcement published to this device’s demo feed.');});
   render();
+})();
+</script>
+
+<!-- PWA install prompt: shown only when the browser says TAPP is installable. -->
+<script>
+(() => {
+  const installButton = document.getElementById('installAppButton');
+  if (!installButton) return;
+
+  let deferredInstallPrompt = null;
+
+  window.addEventListener('beforeinstallprompt', event => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    installButton.classList.remove('hidden');
+  });
+
+  installButton.addEventListener('click', async () => {
+    if (!deferredInstallPrompt) return;
+
+    installButton.disabled = true;
+    try {
+      deferredInstallPrompt.prompt();
+      const choice = await deferredInstallPrompt.userChoice;
+      if (choice?.outcome === 'accepted') {
+        installButton.classList.add('hidden');
+      }
+    } catch (error) {
+      console.warn('TAPP install prompt was not completed:', error);
+    } finally {
+      deferredInstallPrompt = null;
+      installButton.disabled = false;
+    }
+  });
+
+  window.addEventListener('appinstalled', () => {
+    deferredInstallPrompt = null;
+    installButton.classList.add('hidden');
+  });
+})();
+</script>
+
+<!-- Network-first service worker keeps the installed PWA aligned with GitHub/Cloudflare deployments. -->
+<script>
+(() => {
+  if (!('serviceWorker' in navigator)) return;
+
+  let registration = null;
+  let hadController = Boolean(navigator.serviceWorker.controller);
+  let isReloadingForUpdate = false;
+
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (hadController && !isReloadingForUpdate) {
+      isReloadingForUpdate = true;
+      window.location.reload();
+      return;
+    }
+    hadController = true;
+  });
+
+  window.addEventListener('load', async () => {
+    try {
+      registration = await navigator.serviceWorker.register('./service-worker.js', {
+        scope: './',
+        updateViaCache: 'none'
+      });
+
+      // Ask the browser to check for a newer service worker on each launch.
+      await registration.update();
+    } catch (error) {
+      console.warn('TAPP offline support could not be initialized:', error);
+    }
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && registration) {
+      registration.update().catch(error => {
+        console.warn('TAPP update check failed:', error);
+      });
+    }
+  });
 })();
 </script>
 </body>
