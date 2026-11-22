@@ -1,9 +1,3 @@
-/*
- * Project TAPP — Firebase Web App configuration
- * This is client-side configuration. Never place Firebase service-account
- * credentials or private server keys in this file.
- */
-
 window.TAPP_FIREBASE_CONFIG = {
   apiKey: "AIzaSyAzzzBaKPVCLjQ2Nyo0YxLHwMrxNhF2zA",
   authDomain: "tapp-59c19.firebaseapp.com",
