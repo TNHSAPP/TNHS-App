@@ -34,6 +34,238 @@
 @media(max-width:760px){.app-shell{padding-left:0}.app-workspace{width:100%;max-width:none}.desktop-nav{display:none}.topbar{height:66px;padding:0 14px}.account-block{display:none}.top-actions{gap:7px}.role-pill{padding:8px 9px;font-size:9px}.signout-btn{padding:8px 9px;font-size:9px}.main{padding:20px 15px 112px}.bottom-nav{display:grid;position:fixed;z-index:30;bottom:0;left:0;transform:none;width:100%;grid-template-columns:repeat(5,1fr);background:rgba(255,255,255,.96);backdrop-filter:blur(14px);border-top:1px solid #eae5e9;padding:8px 5px calc(8px + env(safe-area-inset-bottom));box-shadow:0 -8px 25px rgba(50,25,40,.06)}.nav-btn{font-size:9px}.nav-ico{width:24px;height:21px}.hero{padding:22px 19px;grid-template-columns:1fr;min-height:280px}.hero-art{position:absolute;right:12px;bottom:13px;opacity:.16;transform:scale(.9)}.hero-copy{max-width:90%}.hero h1{font-size:39px}.quick-grid{grid-template-columns:1fr}.quick-card{padding:13px}.home-columns,.content-grid,.forum-grid{grid-template-columns:1fr}.ann-grid,.contact-grid{grid-template-columns:1fr}.section-head{margin-top:23px}.form-card,.my-reports{padding:17px}.page-title{font-size:26px}.auth-card{padding:31px 25px 25px}.auth-brand-row{margin-bottom:32px}}
 @media(max-width:420px){.hero-copy{max-width:100%;padding-right:25px}.hero-art{opacity:.1}.hero h1{font-size:35px}.form-row{grid-template-columns:1fr}.topbar{padding:0 10px}.brand{gap:8px}.brand-name{font-size:15px}.role-pill{max-width:100px}.avatar{width:30px;height:30px}.signout-btn{font-size:8px;padding:7px}.auth-card{padding:26px 20px 22px}}
 @media(display-mode:standalone){#installAppButton{display:none!important}}
+
+
+/* TAPP navigation refresh: gold gradients, smooth zoom, and viewport-pinned mobile navigation. */
+.desktop-nav {
+  background: linear-gradient(155deg, #fff5c7 0%, #f7dc7b 38%, #e9c04d 70%, #d4a12f 100%);
+  border-right: 1px solid rgba(126, 83, 9, .24);
+  box-shadow: 8px 0 30px rgba(91, 61, 11, .13);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.side-brand { border-bottom-color: rgba(100, 67, 13, .20); }
+.side-brand-name { color: #573900; }
+.side-brand-sub { color: #76591e; }
+.side-section-label { color: #765719; }
+.side-nav-btn {
+  position: relative;
+  color: #624b1b;
+  border: 1px solid transparent;
+  transform: translateZ(0);
+  transform-origin: center left;
+  transition: transform .2s ease, background .2s ease, color .2s ease,
+              box-shadow .2s ease, border-color .2s ease;
+  will-change: transform;
+}
+.side-nav-btn:hover,
+.side-nav-btn:focus-visible {
+  background: linear-gradient(110deg, rgba(255,255,255,.78), rgba(255,245,199,.92));
+  color: #4c3000;
+  border-color: rgba(153, 107, 15, .22);
+  box-shadow: 0 7px 16px rgba(100, 68, 13, .13);
+  transform: scale(1.045);
+  z-index: 2;
+}
+.side-nav-btn.active {
+  background: linear-gradient(105deg, #fff9dc 0%, #ffe58a 55%, #f4cd53 100%);
+  color: #4b3000;
+  border-color: rgba(151, 104, 12, .28);
+  box-shadow: inset 3px 0 0 #9c6908, 0 5px 13px rgba(100, 68, 13, .10);
+}
+.side-nav-image { transition: transform .2s ease; }
+.side-nav-btn:hover .side-nav-image,
+.side-nav-btn:focus-visible .side-nav-image { transform: scale(1.12); }
+.side-nav-bottom {
+  background: linear-gradient(140deg, #6f1726 0%, #941f30 58%, #b12c38 100%);
+  box-shadow: 0 8px 18px rgba(91, 24, 34, .18);
+}
+
+@media (max-width: 760px) {
+  /* backdrop-filter creates a containing block for fixed descendants in some browsers.
+     Removing it here keeps .bottom-nav fixed to the actual viewport, not the page content. */
+  .app-workspace {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .main {
+    padding-bottom: calc(112px + env(safe-area-inset-bottom));
+  }
+  .bottom-nav {
+    display: grid;
+    position: fixed;
+    inset: auto 0 0 0;
+    width: 100%;
+    min-height: calc(66px + env(safe-area-inset-bottom));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    align-items: center;
+    gap: 2px;
+    padding: 8px max(6px, env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left));
+    background: linear-gradient(105deg, #fff4bd 0%, #f7dc7a 42%, #e8bd48 76%, #d4a02c 100%);
+    border-top: 1px solid rgba(126, 83, 9, .30);
+    box-shadow: 0 -9px 28px rgba(83, 57, 11, .18);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    z-index: 1000;
+    isolation: isolate;
+  }
+  .nav-btn {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    padding: 5px 2px;
+    gap: 3px;
+    color: #674d16;
+    font-size: 9px;
+    line-height: 1.1;
+    transition: transform .2s ease, background .2s ease, color .2s ease,
+                box-shadow .2s ease, border-color .2s ease;
+    transform-origin: center bottom;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nav-ico {
+    width: 24px;
+    height: 21px;
+    transition: transform .2s ease;
+  }
+  .nav-btn.active {
+    color: #4b2f00;
+    background: linear-gradient(145deg, #fffbe4 0%, #ffe78f 58%, #f4ce54 100%);
+    border-color: rgba(137, 92, 8, .28);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.85), 0 4px 10px rgba(102, 70, 12, .14);
+  }
+}
+
+/* Hover zoom is enabled for a real mouse/trackpad; touch users get a clear press state. */
+@media (hover: hover) and (pointer: fine) {
+  .nav-btn:hover,
+  .nav-btn:focus-visible {
+    color: #4b2f00;
+    background: linear-gradient(145deg, rgba(255,255,255,.82), rgba(255,239,174,.96));
+    border-color: rgba(137, 92, 8, .22);
+    box-shadow: 0 5px 13px rgba(102, 70, 12, .14);
+    transform: scale(1.07);
+    z-index: 2;
+  }
+  .nav-btn:hover .nav-ico,
+  .nav-btn:focus-visible .nav-ico { transform: scale(1.13); }
+  .nav-btn.active:hover {
+    background: linear-gradient(145deg, #fffbe4 0%, #ffe78f 58%, #f4ce54 100%);
+  }
+}
+.nav-btn:active { transform: scale(.96); }
+@media (prefers-reduced-motion: reduce) {
+  .side-nav-btn, .side-nav-image, .nav-btn, .nav-ico { transition: none !important; }
+}
+
+
+/* Community forum refresh: compact composer prompt, full-width feed, and a focused create-post dialog. */
+.forum-layout{display:flex;flex-direction:column;gap:15px;max-width:1000px;margin:0 auto}
+.forum-composer-card{background:rgba(255,255,255,.96);border:1px solid #eee3e6;border-radius:19px;padding:17px 19px;box-shadow:0 9px 26px rgba(52,25,35,.055)}
+.forum-composer-row{display:flex;align-items:center;gap:12px}
+.forum-composer-avatar{width:42px;height:42px;flex:0 0 42px;border-radius:50%;background-color:#fff5e8}
+.forum-compose-trigger{width:100%;min-height:46px;border:1px solid #e9e2e5;border-radius:999px;background:#faf8f9;color:#827780;text-align:left;padding:0 19px;font-size:13px;font-weight:650;transition:background .18s,border-color .18s,box-shadow .18s,transform .18s}
+.forum-compose-trigger:hover{background:#fffaf0;border-color:#dfc47a;box-shadow:0 5px 14px rgba(150,112,24,.09);transform:translateY(-1px)}
+.forum-composer-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;border-top:1px solid #f0eaed;margin-top:14px;padding-top:12px}
+.forum-composer-footer>span{font-size:10px;line-height:1.45;color:#948a91}
+.forum-create-btn{border:0;border-radius:10px;background:linear-gradient(135deg,#fff1b8,#f4c52e 58%,#dfa914);color:#5c3c00;padding:9px 13px;font-size:11px;font-weight:900;white-space:nowrap;box-shadow:0 4px 10px rgba(178,132,14,.12);transition:transform .18s,box-shadow .18s}
+.forum-create-btn:hover{transform:translateY(-2px) scale(1.025);box-shadow:0 7px 16px rgba(178,132,14,.2)}
+.forum-create-btn span{font-size:15px;vertical-align:-1px;margin-right:3px}
+.forum-feed-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:7px 1px 0}
+.forum-feed-heading h2{font-size:17px;margin:0;color:#342a30;letter-spacing:-.02em}
+.forum-feed-heading p{font-size:11px;color:var(--muted);margin:4px 0 0}
+.forum-feed-status{border:1px solid #eee5e8;border-radius:999px;padding:7px 10px;background:#fff;color:#817780;font-size:9px;font-weight:800;white-space:nowrap}
+.forum-post-list{display:flex;flex-direction:column;gap:12px}
+.forum-post-list .post-card{margin:0;padding:19px 20px;border-radius:18px}
+.forum-post-list .post-card h3{font-size:15px;margin:12px 0 7px;color:#382b32}
+.forum-post-list .post-card p{font-size:12px;line-height:1.65}
+.forum-modal{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:20px;isolation:isolate}
+.forum-modal.hidden{display:none!important}
+.forum-modal-backdrop{position:absolute;inset:0;width:100%;height:100%;border:0;background:rgba(30,18,24,.54);backdrop-filter:blur(5px);cursor:default}
+.forum-modal-card{position:relative;z-index:1;width:min(100%,540px);max-height:min(90vh,760px);overflow-y:auto;background:#fff;border:1px solid rgba(255,255,255,.7);border-radius:22px;padding:23px;box-shadow:0 24px 80px rgba(28,10,18,.28);animation:forumModalIn .2s ease}
+@keyframes forumModalIn{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+.forum-modal-header{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;padding-bottom:15px;border-bottom:1px solid #f0eaed}
+.forum-modal-header h2{font-size:19px;color:var(--wine);margin:0;letter-spacing:-.025em}
+.forum-modal-header p{font-size:11px;color:var(--muted);margin:5px 0 0}
+.forum-modal-close{width:34px;height:34px;border:0;border-radius:50%;background:#f7f3f5;color:#6b5b64;font-size:22px;line-height:1;display:grid;place-items:center;transition:background .15s,transform .15s}
+.forum-modal-close:hover{background:#f0e5e8;transform:rotate(90deg)}
+.forum-post-form{padding-top:3px}
+.forum-post-form .field{margin:14px 0}
+.forum-post-form .field textarea{min-height:125px}
+.forum-form-actions{display:flex;justify-content:flex-end;gap:9px;padding-top:8px}
+.forum-cancel-btn{border:1px solid #e8dfe3;background:#fff;color:#6b5f66;border-radius:11px;padding:11px 15px;font-size:12px;font-weight:800}
+.forum-cancel-btn:hover{background:#faf7f8}
+body.forum-modal-open{overflow:hidden}
+@media(max-width:760px){.forum-layout{gap:13px}.forum-composer-card{padding:14px;border-radius:16px}.forum-composer-avatar{width:38px;height:38px;flex-basis:38px}.forum-compose-trigger{min-height:43px;font-size:12px;padding:0 15px}.forum-composer-footer{align-items:flex-start}.forum-composer-footer>span{max-width:58%}.forum-create-btn{padding:9px 10px;font-size:10px}.forum-feed-heading{align-items:flex-start}.forum-feed-heading h2{font-size:16px}.forum-feed-status{font-size:8px;padding:6px 8px}.forum-post-list .post-card{padding:16px}.forum-modal{padding:12px;align-items:end}.forum-modal-card{max-height:88dvh;border-radius:20px 20px 14px 14px;padding:19px}.forum-feed-heading p{max-width:220px}}
+@media(max-width:380px){.forum-composer-footer>span{font-size:9px}.forum-create-btn{font-size:9px}.forum-feed-status{max-width:118px;overflow:hidden;text-overflow:ellipsis}}
+
+
+/* Home hero media: use the GitHub asset paths supplied for TAPP. */
+.hero {
+  background-image:
+    linear-gradient(90deg, rgba(255,250,245,.90) 0%, rgba(255,250,245,.80) 49%, rgba(255,250,245,.42) 100%),
+    url("./photos/tnhs.image");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  grid-template-columns: minmax(0, 1.25fr) minmax(260px, .85fr);
+  align-items: center;
+}
+.hero-copy-content { position: relative; z-index: 2; }
+.hero-art {
+  position: relative;
+  z-index: 2;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transform: none;
+}
+.hero-video {
+  display: block;
+  width: 100%;
+  max-width: 410px;
+  aspect-ratio: 16 / 10;
+  max-height: 280px;
+  object-fit: cover;
+  border: 5px solid rgba(255,255,255,.88);
+  border-radius: 20px;
+  background: #241c20;
+  box-shadow: 0 18px 38px rgba(62,28,34,.22);
+}
+@media (max-width: 760px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+    background-position: center;
+  }
+  .hero-copy-content { min-width: 0; }
+  .hero-copy { max-width: 100%; }
+  .hero-art {
+    position: relative;
+    inset: auto;
+    min-height: 0;
+    margin-top: 15px;
+    opacity: 1;
+    transform: none;
+    justify-content: flex-start;
+  }
+  .hero-video {
+    width: min(100%, 520px);
+    max-height: 230px;
+  }
+}
+@media (max-width: 420px) {
+  .hero-art { opacity: 1; }
+  .hero-video { max-height: 200px; border-width: 4px; border-radius: 16px; }
+}
+
 </style>
 </head>
 <body>
@@ -74,7 +306,7 @@
     </header>
     <main class="main">
       <section class="view active" id="view-home" aria-labelledby="home-title">
-        <div class="hero"><div><div class="eyebrow">Your school. Your voice. One platform.</div><h1 id="home-title">Stay informed.<br><span>Speak up.</span><br>Make a difference.</h1><p class="hero-copy">A central place for the TNHS community to report facility concerns, keep up with school announcements, and find important contacts.</p><div class="hero-actions"><button class="btn btn-primary" data-go="report">Report a concern</button><button class="btn btn-soft" data-go="updates">View announcements</button></div></div><div class="hero-art" aria-hidden="true"><div class="phone"><div class="phone-top">Tarlac National<br>High School <span>TAPP • CONNECT</span></div><div class="phone-row">Emergency Contacts</div><div class="phone-row">Facility Concerns</div><div class="phone-row">Latest Announcements</div><div class="phone-bottom"></div></div></div></div>
+        <div class="hero"><div class="hero-copy-content"><div class="eyebrow">Your school. Your voice. One platform.</div><h1 id="home-title">Stay informed.<br><span>Speak up.</span><br>Make a difference.</h1><p class="hero-copy">A central place for the TNHS community to report facility concerns, keep up with school announcements, and find important contacts.</p><div class="hero-actions"><button class="btn btn-primary" data-go="report">Report a concern</button><button class="btn btn-soft" data-go="updates">View announcements</button></div></div><div class="hero-art"><video class="hero-video" controls autoplay muted loop playsinline preload="metadata" aria-label="TAPP student community video"><source src="./videos/student.mp4" type="video/mp4">Your browser does not support embedded video.</video></div></div>
         <div class="section-head"><div><h2>What do you need today?</h2><p>Quick access to the services of TAPP.</p></div></div>
         <div class="quick-grid">
           <button class="quick-card" data-go="report"><span class="quick-icon image-slot" data-image-slot="facility-report" role="img" aria-label="Facility report"></span><span><strong>Report a facility issue</strong><small>Tell the school about damage or maintenance needs.</small></span></button>
@@ -105,10 +337,49 @@
 
       <section class="view" id="view-contacts" aria-labelledby="contacts-title"><h1 class="page-title" id="contacts-title">Emergency contacts</h1><p class="page-desc">Use the directory to identify the appropriate school office or personnel.</p><div class="staff-banner">Contact numbers below are intentionally left as placeholders. <strong>TNHS must verify and enter official contact details before real-world use.</strong> For immediate emergencies, contact school personnel directly.</div><div class="contact-grid" id="contactList"></div></section>
 
-      <section class="view" id="view-forum" aria-labelledby="forum-title"><h1 class="page-title" id="forum-title">TNHS community forum</h1><p class="page-desc">A shared space for school-related ideas, reminders, and community updates.</p><div class="forum-grid"><form class="form-card" id="postForm"><h3>Share with the community</h3><p class="form-note">Keep posts respectful and relevant to the school community. Do not post private information.</p><div class="field"><label for="postName">Display name</label><input id="postName" maxlength="35" placeholder="Your display name" required /></div><div class="field"><label for="postTitle">Post title</label><input id="postTitle" maxlength="80" placeholder="What would you like to share?" required /></div><div class="field"><label for="postBody">Message</label><textarea id="postBody" maxlength="500" placeholder="Write your school-related post..." required></textarea></div><div class="field"><label for="postVisibility">Who can see this post?</label><select id="postVisibility" required><option value="public">Public — TNHS community</option><option value="admin">Admin only — school staff</option></select><div class="field-hint">Choose Public for a community discussion, or Admin only to send a post privately to school staff.</div></div><button class="btn btn-dark" type="submit">Publish post</button></form><div><div class="panel-title"><h3>Recent community posts</h3><span id="forumFeedLabel">Public community feed</span></div><div class="staff-banner forum-privacy-note">This prototype stores posts on this device only. Real public and admin-only visibility across accounts needs a secured shared database and server-side access rules.</div><div id="forumPosts"></div></div></div></section>
+      <section class="view" id="view-forum" aria-labelledby="forum-title">
+        <h1 class="page-title" id="forum-title">TNHS community forum</h1>
+        <p class="page-desc">A shared space for school-related ideas, reminders, and community updates.</p>
+        <div class="forum-layout">
+          <section class="forum-composer-card" aria-label="Create a community post">
+            <div class="forum-composer-row">
+              <div class="forum-composer-avatar image-slot" data-image-slot="profile" role="img" aria-label="Your profile"></div>
+              <button class="forum-compose-trigger" type="button" data-open-post-composer>
+                <span>What's on your mind?</span>
+              </button>
+            </div>
+            <div class="forum-composer-footer">
+              <span>Share an idea, reminder, or update with the TNHS community.</span>
+              <button class="forum-create-btn" type="button" data-open-post-composer><span aria-hidden="true">＋</span> Create post</button>
+            </div>
+          </section>
+          <div class="forum-feed-heading">
+            <div><h2>Recent community posts</h2><p>See what's being shared by the TNHS community.</p></div>
+            <span class="forum-feed-status" id="forumFeedLabel">Public community feed</span>
+          </div>
+          <div class="staff-banner forum-privacy-note">This prototype stores posts on this device only. Real public and admin-only visibility across accounts needs a secured shared database and server-side access rules.</div>
+          <div id="forumPosts" class="forum-post-list"></div>
+        </div>
+      </section>
     </main>
     <nav class="bottom-nav" aria-label="Main navigation"><button class="nav-btn active" data-page="home"><span class="nav-ico image-slot" data-image-slot="home" role="img" aria-label="Home"></span><span>Home</span></button><button class="nav-btn" data-page="report"><span class="nav-ico image-slot" data-image-slot="report" role="img" aria-label="Report"></span><span id="reportNavLabel">Report</span></button><button class="nav-btn" data-page="updates"><span class="nav-ico image-slot" data-image-slot="updates" role="img" aria-label="Updates"></span><span>Updates</span></button><button class="nav-btn" data-page="contacts"><span class="nav-ico image-slot" data-image-slot="contacts" role="img" aria-label="Contacts"></span><span>Contacts</span></button><button class="nav-btn" data-page="forum"><span class="nav-ico image-slot" data-image-slot="forum" role="img" aria-label="Forum"></span><span>Forum</span></button></nav>
   </div>
+</div>
+<div class="forum-modal hidden" id="forumComposer" aria-hidden="true">
+  <button class="forum-modal-backdrop" type="button" data-close-post-composer aria-label="Close post composer"></button>
+  <section class="forum-modal-card" role="dialog" aria-modal="true" aria-labelledby="forumComposerTitle">
+    <div class="forum-modal-header">
+      <div><h2 id="forumComposerTitle">Create a post</h2><p>Share something with the TNHS community.</p></div>
+      <button class="forum-modal-close" type="button" data-close-post-composer aria-label="Close">×</button>
+    </div>
+    <form class="forum-post-form" id="postForm">
+      <div class="field"><label for="postName">Display name</label><input id="postName" maxlength="35" placeholder="Your display name" required /></div>
+      <div class="field"><label for="postTitle">Post title</label><input id="postTitle" maxlength="80" placeholder="Give your post a title" required /></div>
+      <div class="field"><label for="postBody">What's on your mind?</label><textarea id="postBody" maxlength="500" placeholder="Write your school-related post..." required></textarea></div>
+      <div class="field"><label for="postVisibility">Who can see this post?</label><select id="postVisibility" required><option value="public">Public — TNHS community</option><option value="admin">Admin only — school staff</option></select><div class="field-hint">Choose Public for a community discussion, or Admin only to send a post privately to school staff.</div></div>
+      <div class="forum-form-actions"><button class="forum-cancel-btn" type="button" data-close-post-composer>Cancel</button><button class="btn btn-dark" type="submit">Publish post</button></div>
+    </form>
+  </section>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -302,6 +573,26 @@
       return;
     }
   });
+  const openPostComposer=()=>{
+    const modal=$('forumComposer');
+    modal.classList.remove('hidden');
+    modal.setAttribute('aria-hidden','false');
+    document.body.classList.add('forum-modal-open');
+    window.setTimeout(()=>$('postTitle').focus(),40);
+  };
+  const closePostComposer=()=>{
+    const modal=$('forumComposer');
+    modal.classList.add('hidden');
+    modal.setAttribute('aria-hidden','true');
+    document.body.classList.remove('forum-modal-open');
+  };
+  document.addEventListener('click',e=>{
+    if(e.target.closest('[data-open-post-composer]')){openPostComposer();return;}
+    if(e.target.closest('[data-close-post-composer]')){closePostComposer();return;}
+  });
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'&&!$('forumComposer').classList.contains('hidden'))closePostComposer();
+  });
   $('roleToggle').addEventListener('click',()=>{if(signedInUser){showToast('Admin access is granted by TNHS through a verified account role.');return;}role=role==='student'?'staff':'student';render();showToast(role==='staff'?'Admin preview enabled for prototype testing only.':'Back to student view.');});
   $('reportPhoto').addEventListener('change',async e=>{const file=e.target.files?.[0];pendingPhoto='';$('photoPreview').innerHTML='';if(!file)return;if(!file.type.startsWith('image/')){showToast('Please choose an image file.');e.target.value='';return;}if(file.size>8*1024*1024){showToast('Please choose an image smaller than 8 MB.');e.target.value='';return;}try{pendingPhoto=await compressImage(file);$('photoPreview').innerHTML='<div class="field-hint">Photo attached and ready to submit.</div><img src="'+pendingPhoto+'" alt="Selected report photo" style="max-width:100%;max-height:130px;border-radius:9px;margin-top:8px" />';}catch{showToast('Could not read this image.');}});
   function compressImage(file){
@@ -329,7 +620,7 @@
     });
   }
   $('reportForm').addEventListener('submit',e=>{e.preventDefault();const report={id:uid('TAPP'),category:$('reportCategory').value,location:$('reportLocation').value.trim(),title:$('reportTitle').value.trim(),details:$('reportDetails').value.trim(),photo:pendingPhoto,status:'Submitted',date:dateLabel()};if(!report.category||!report.location||!report.title||!report.details||!pendingPhoto||!$('reportConfirm').checked){showToast(!pendingPhoto?'Photo evidence is required to submit a report.':'Please complete all required fields.');if(!pendingPhoto)$('reportPhoto').focus();return;}data.reports.push(report);save();e.target.reset();pendingPhoto='';$('photoPreview').innerHTML='';renderReports();renderHome();showToast(`Report submitted. Reference: ${report.id.slice(-7).toUpperCase()}`);});
-  $('postForm').addEventListener('submit',e=>{e.preventDefault();const p={id:uid('post'),name:$('postName').value.trim(),title:$('postTitle').value.trim(),body:$('postBody').value.trim(),date:dateLabel(),visibility:$('postVisibility').value,reactions:{support:0,helpful:0,thanks:0},comments:[]};if(!p.name||!p.title||!p.body)return;data.posts.push(p);save();e.target.reset();$('postName').value=signedInUser?.displayName||(isDemoSession?'TAPP Demo Student':'TNHS Student');$('postVisibility').value='public';renderForum();showToast(p.visibility==='admin'?'Post sent to the admin-only demo inbox.':'Public post published to the demo feed.');});
+  $('postForm').addEventListener('submit',e=>{e.preventDefault();const p={id:uid('post'),name:$('postName').value.trim(),title:$('postTitle').value.trim(),body:$('postBody').value.trim(),date:dateLabel(),visibility:$('postVisibility').value,reactions:{support:0,helpful:0,thanks:0},comments:[]};if(!p.name||!p.title||!p.body)return;data.posts.push(p);save();e.target.reset();$('postName').value=signedInUser?.displayName||(isDemoSession?'TAPP Demo Student':'TNHS Student');$('postVisibility').value='public';closePostComposer();renderForum();showToast(p.visibility==='admin'?'Post sent to the admin-only demo inbox.':'Public post published to the demo feed.');});
   $('forumPosts').addEventListener('submit',e=>{const form=e.target.closest('[data-comment-form]');if(!form)return;e.preventDefault();const post=data.posts.find(item=>item.id===form.dataset.commentForm);const input=form.querySelector('[name="commentText"]');const text=input.value.trim();if(!post||!text)return;post.comments=post.comments||[];post.comments.push({id:uid('comment'),name:signedInUser?.displayName||(isDemoSession?'TAPP Demo Student':'TNHS Student'),text,date:dateLabel(),parentId:input.dataset.parentId||null});save();renderForum();showToast('Comment added.');});
   document.addEventListener('change',e=>{const id=e.target.dataset.statusId;if(id){const r=data.reports.find(x=>x.id===id);if(r){r.status=e.target.value;save();renderReports();renderHome();showToast('Report status updated.');}}});
   $('announcementAdmin').addEventListener('submit',e=>{if(e.target.id!=='announcementForm')return;e.preventDefault();const a={id:uid('ann'),category:$('annCategory').value,title:$('annTitle').value.trim(),body:$('annBody').value.trim(),date:dateLabel(),pinned:false};if(!a.title||!a.body)return;data.announcements.unshift(a);save();renderAnnouncements();renderHome();showToast('Announcement published to this device’s demo feed.');});
@@ -422,5 +713,71 @@
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&registration)registration.update().catch(error=>console.warn('TAPP update check failed:',error));});
 })();
 </script>
+
+<!-- Subtle synthesized pop sounds for navigation hover and click. -->
+<script>
+(() => {
+  'use strict';
+  let audioContext = null;
+  let lastHoveredItem = null;
+  let lastHoverSoundAt = 0;
+
+  const playNavigationPop = (kind) => {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+
+    try {
+      if (!audioContext) audioContext = new AudioContextClass();
+      if (audioContext.state === 'suspended') audioContext.resume().catch(() => {});
+
+      const now = audioContext.currentTime;
+      const oscillator = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      const isClick = kind === 'click';
+      const startFrequency = isClick ? 690 : 880;
+      const endFrequency = isClick ? 390 : 560;
+      const peakVolume = isClick ? 0.045 : 0.026;
+
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(startFrequency, now);
+      oscillator.frequency.exponentialRampToValueAtTime(endFrequency, now + 0.075);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(peakVolume, now + 0.008);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.105);
+
+      oscillator.connect(gain);
+      gain.connect(audioContext.destination);
+      oscillator.start(now);
+      oscillator.stop(now + 0.11);
+    } catch (error) {
+      // Navigation should continue normally if audio is unavailable or blocked.
+    }
+  };
+
+  document.addEventListener('pointerover', (event) => {
+    if (event.pointerType === 'touch') return;
+    const item = event.target.closest?.('.side-nav-btn, .nav-btn');
+    const related = event.relatedTarget;
+    if (!item || (related instanceof Node && item.contains(related))) return;
+
+    const now = performance.now();
+    if (item === lastHoveredItem && now - lastHoverSoundAt < 220) return;
+    lastHoveredItem = item;
+    lastHoverSoundAt = now;
+    playNavigationPop('hover');
+  }, true);
+
+  document.addEventListener('pointerout', (event) => {
+    const item = event.target.closest?.('.side-nav-btn, .nav-btn');
+    const related = event.relatedTarget;
+    if (item && !(related instanceof Node && item.contains(related))) lastHoveredItem = null;
+  }, true);
+
+  document.addEventListener('click', (event) => {
+    if (event.target.closest?.('.side-nav-btn, .nav-btn')) playNavigationPop('click');
+  }, true);
+})();
+</script>
+
 </body>
 </html>
