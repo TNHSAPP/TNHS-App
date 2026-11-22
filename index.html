@@ -152,7 +152,7 @@ body{background-image:radial-gradient(ellipse at 10% 5%,rgba(232,190,198,.46),tr
     <button class="google-btn" id="googleSignIn" type="button"><span class="google-mark" aria-hidden="true">G</span><span>Continue with Google</span></button>
     <div class="auth-divider"><span>or</span></div>
     <button class="btn btn-soft demo-btn" id="demoSignIn" type="button">Explore the prototype</button>
-    <p class="auth-status" id="authStatus" role="status" aria-live="polite">Google sign-in requires TNHS Firebase configuration. You can explore the demo while it is being set up.</p>
+    <p class="auth-status" id="authStatus" role="status" aria-live="polite">Sign in with your Google account to continue. For first-time setup, Google Authentication must be enabled in the TNHS Firebase project.</p>
     <div class="auth-foot">For the TNHS school community</div>
   </div>
   <div class="auth-background-note">PROJECT TAPP · SCHOOL ASSISTANCE AND PUBLIC PLATFORM</div>
@@ -315,54 +315,117 @@ body{background-image:radial-gradient(ellipse at 10% 5%,rgba(232,190,198,.46),tr
   const ensureFirebaseSdk = async () => {
     if (window.firebase?.auth) return window.firebase;
     if (!firebaseLoadPromise) firebaseLoadPromise = (async () => {
-      await loadExternalScript('https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js');
-      await loadExternalScript('https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js');
+      await loadExternalScript('https://www.gstatic.com/firebasejs/13.3.0/firebase-app-compat.js');
+      await loadExternalScript('https://www.gstatic.com/firebasejs/13.3.0/firebase-auth-compat.js');
       return window.firebase;
     })();
     return firebaseLoadPromise;
   };
-  const initializeFirebaseAuth = async () => {
+  const ensureFirebaseAuth = async () => {
     await ensureFirebaseSdk();
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     firebaseAuth = firebase.auth();
-    firebaseAuth.onAuthStateChanged(async user => {
-      signedInUser = user || null;
-      role = 'student';
-      if (user) {
-        try {
-          const token = await user.getIdTokenResult();
-          if (token?.claims?.admin === true) role = 'staff';
-        } catch (_) { role = 'student'; }
-        revealApp();
-      } else { showAuth(); }
-    });
-  };
-  const signInWithGoogle = async () => {
-    if (!firebaseConfigured) {
-      setAuthStatus('Google sign-in is not configured yet. Add the TNHS Firebase web-app settings to firebase-config.js, enable Google Authentication, and run TAPP from localhost or an approved school domain.');
-      showToast('Google sign-in setup is required.');
-      return;
+    // Keep the user's Firebase session across reloads on this browser.
+    try { await firebaseAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch (error) {
+      console.warn('Could not set Firebase auth persistence:', error);
     }
-    try {
-      await ensureFirebaseSdk();
-      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-      firebaseAuth = firebase.auth();
-      const provider = new firebase.auth.GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: 'select_account' });
-      const credential = await firebaseAuth.signInWithPopup(provider);
-      signedInUser = credential.user;
+    return firebaseAuth;
+  };
+  const authErrorMessage = error => {
+    const code = error?.code || '';
+    const messages = {
+      'auth/operation-not-allowed': 'Google sign-in is not enabled in Firebase yet. In Firebase Console, open Authentication → Sign-in method, enable Google, and save.',
+      'auth/unauthorized-domain': `This website domain is not authorized in Firebase. Add "${location.hostname}" under Authentication → Settings → Authorized domains.`,
+      'auth/popup-blocked': 'Your browser blocked the Google sign-in window. Allow pop-ups for this site and try again.',
+      'auth/popup-closed-by-user': 'The Google sign-in window was closed before sign-in finished. Try again when ready.',
+      'auth/cancelled-popup-request': 'A Google sign-in request is already in progress. Please try again in a moment.',
+      'auth/network-request-failed': 'A network error interrupted Google sign-in. Check your internet connection and try again.',
+      'auth/too-many-requests': 'Too many sign-in attempts were made. Please wait a little while before trying again.',
+      'auth/invalid-api-key': 'Firebase rejected the API key. Check the Firebase web app configuration.',
+      'auth/invalid-oauth-client-id': 'The Google sign-in client is not configured correctly in the Firebase project.'
+    };
+    return messages[code] || error?.message || 'Google sign-in could not be completed. Check the Firebase setup and try again.';
+  };
+  const applyAuthenticatedUser = async user => {
+    signedInUser = user || null;
+    role = 'student';
+    if (user) {
       isDemoSession = false;
       localStorage.removeItem('tapp_demo_session');
-      role = 'student';
       try {
-        const token = await signedInUser.getIdTokenResult();
+        const token = await user.getIdTokenResult();
         if (token?.claims?.admin === true) role = 'staff';
       } catch (_) { role = 'student'; }
       revealApp();
       render();
+    } else if (!isDemoSession) {
+      showAuth();
+    }
+  };
+  const initializeFirebaseAuth = async () => {
+    await ensureFirebaseAuth();
+    firebaseAuth.onAuthStateChanged(user => { applyAuthenticatedUser(user); });
+    // Surface errors returned after a mobile/redirect-based Google sign-in.
+    try { await firebaseAuth.getRedirectResult(); }
+    catch (error) {
+      console.error('Google redirect sign-in failed:', error);
+      setAuthStatus(authErrorMessage(error));
+      showAuth();
+    }
+  };
+  const signInWithGoogle = async () => {
+    if (location.protocol === 'file:') {
+      setAuthStatus('Google sign-in cannot run from a file:// address. Start a local web server (for example, python -m http.server 8000) and open http://localhost:8000, or use your approved HTTPS school website.');
+      showToast('Open TAPP through localhost or an HTTPS website.');
+      return;
+    }
+    if (!firebaseConfigured) {
+      setAuthStatus('Firebase configuration is missing. Check firebase-config.js before signing in.');
+      showToast('Google sign-in setup is required.');
+      return;
+    }
+    const button = $('googleSignIn');
+    const originalButtonText = button.innerHTML;
+    button.disabled = true;
+    button.style.opacity = '.7';
+    button.querySelector('span:last-child').textContent = 'Connecting to Google…';
+    setAuthStatus('Opening secure Google sign-in…');
+    try {
+      await ensureFirebaseAuth();
+      const provider = new firebase.auth.GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+      // Redirect is generally more reliable on phones; desktop uses a popup.
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && window.innerWidth < 900);
+      if (isMobile) {
+        isDemoSession = false;
+        localStorage.removeItem('tapp_demo_session');
+        await firebaseAuth.signInWithRedirect(provider);
+        return;
+      }
+      const credential = await firebaseAuth.signInWithPopup(provider);
+      await applyAuthenticatedUser(credential.user);
     } catch (error) {
       console.error('Google sign-in failed:', error);
-      setAuthStatus(error?.message || 'Google sign-in could not be completed. Check Firebase authorized domains and try again.');
+      // Some desktop browsers block popups. Retry with the supported redirect flow.
+      if (error?.code === 'auth/popup-blocked') {
+        try {
+          const provider = new firebase.auth.GoogleAuthProvider();
+          provider.setCustomParameters({ prompt: 'select_account' });
+          isDemoSession = false;
+          localStorage.removeItem('tapp_demo_session');
+          await firebaseAuth.signInWithRedirect(provider);
+          return;
+        } catch (redirectError) {
+          console.error('Google redirect fallback failed:', redirectError);
+          setAuthStatus(authErrorMessage(redirectError));
+        }
+      } else {
+        setAuthStatus(authErrorMessage(error));
+      }
+    } finally {
+      button.disabled = false;
+      button.style.opacity = '';
+      button.innerHTML = originalButtonText;
     }
   };
   if (isDemoSession) { revealApp(); }
